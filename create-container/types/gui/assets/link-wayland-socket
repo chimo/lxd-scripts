@@ -1,0 +1,18 @@
+#!/sbin/openrc-run
+
+depends()
+{
+    after clock root
+}
+
+start()
+{
+    install -Dd -m0700 /tmp/1000-runtime-dir
+    ln -s /mnt/wayland1/wayland-1 /tmp/1000-runtime-dir/wayland-1
+}
+
+stop()
+{
+    rm /tmp/1000-runtime-dir/wayland-1
+}
+
