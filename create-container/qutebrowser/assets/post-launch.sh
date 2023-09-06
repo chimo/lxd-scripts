@@ -7,3 +7,5 @@ name="${1}"
 # TODO: use xdg config path or wtv
 lxc exec "${name}" -- mkdir -p /root/.config/qutebrowser
 
+lxc profile add "${name}" "${name}"
+
