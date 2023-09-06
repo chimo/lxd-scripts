@@ -88,6 +88,11 @@ main() (
     # Create profiles if they don't exist
     ensure_profiles_exist "${types}" "${script_dir}/types"
 
+    # Create container-specific profile
+    if [ -e "${script_dir}/${name}/assets/lxd.profile" ]; then
+        ensure_profiles_exist "${name}" "${script_dir}"
+    fi
+
     # Create container
     lxc launch images:alpine/3.18/amd64 "${name}"
 
