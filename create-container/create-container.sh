@@ -86,7 +86,9 @@ main() (
     script_dir=$(dirname -- "$( readlink -f -- "$0"; )")
 
     # Create profiles if they don't exist
-    ensure_profiles_exist "${types}" "${script_dir}/types"
+    if [ -n "${types}" ]; then
+        ensure_profiles_exist "${types}" "${script_dir}/types"
+    fi
 
     # Create container-specific profile
     if [ -e "${script_dir}/${name}/assets/lxd.profile" ]; then
@@ -103,7 +105,9 @@ main() (
     lxc exec "${name}" -- sh < "${script_dir}/common/post-launch.sh"
 
     # "Types" post-launch commands
-    run_post_launch "${name}" "${types}" "${script_dir}/types"
+    if [ -n "${types}" ]; then
+        run_post_launch "${name}" "${types}" "${script_dir}/types"
+    fi
 
     # Container post-launch commands
     if [ -e "${script_dir}/${name}/assets/post-launch.sh" ]; then
