@@ -1,5 +1,5 @@
 #!/bin/sh -e
 
-# Install aerc
-apk add aerc
+# Install aerc and vim
+apk add aerc vim
 
