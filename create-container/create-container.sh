@@ -115,7 +115,9 @@ main() (
     fi
 
     # "Types" post-config commands
-    run_post_config "${name}" "${types}" "${script_dir}/types"
+    if [ -n "${types}" ]; then
+        run_post_config "${name}" "${types}" "${script_dir}/types"
+    fi
 
     # Container post-config commands
     if [ -e "${script_dir}/${name}/assets/remote.sh" ]; then
