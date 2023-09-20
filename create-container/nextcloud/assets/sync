@@ -1,0 +1,6 @@
+#!/bin/sh -e
+
+source /root/.config/Nextcloud/env
+
+nextcloudcmd -s -u chimo -p ${NC_SECRET} /root/nextcloud https://files.chromic.org > /dev/null 2>&1
+
