@@ -11,7 +11,7 @@ devices:
     type: disk
   mail:
     path: /root/mail
-    source: /home/chimo/mail
+    source: /home/chimo/.local/mail
     type: disk
 name: aerc
 
