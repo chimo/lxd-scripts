@@ -84,6 +84,7 @@ main() (
 
     # Define some paths
     script_dir=$(dirname -- "$( readlink -f -- "$0"; )")
+    containers_dir="${script_dir}/containers"
 
     # Create profiles if they don't exist
     if [ -n "${types}" ]; then
@@ -91,8 +92,8 @@ main() (
     fi
 
     # Create container-specific profile
-    if [ -e "${script_dir}/${name}/assets/lxd.profile" ]; then
-        ensure_profiles_exist "${name}" "${script_dir}"
+    if [ -e "${containers_dir}/${name}/assets/lxd.profile" ]; then
+        ensure_profiles_exist "${name}" "${containers_dir}"
     fi
 
     # Create container
@@ -110,8 +111,8 @@ main() (
     fi
 
     # Container post-launch commands
-    if [ -e "${script_dir}/${name}/assets/post-launch.sh" ]; then
-        "${script_dir}/${name}/assets/post-launch.sh" "${name}"
+    if [ -e "${containers_dir}/${name}/assets/post-launch.sh" ]; then
+        "${containers_dir}/${name}/assets/post-launch.sh" "${name}"
     fi
 
     # "Types" post-config commands
@@ -120,8 +121,8 @@ main() (
     fi
 
     # Container post-config commands
-    if [ -e "${script_dir}/${name}/assets/remote.sh" ]; then
-        lxc exec "${name}" -- sh < "${script_dir}/${name}/assets/remote.sh"
+    if [ -e "${containers_dir}/${name}/assets/remote.sh" ]; then
+        lxc exec "${name}" -- sh < "${containers_dir}/${name}/assets/remote.sh"
     fi
 )
 
