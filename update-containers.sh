@@ -67,7 +67,27 @@ upgrade() (
 )
 
 
-main() (
+update() (
+    name="${1}"
+    os="${2}"
+
+    echo "Processing ${name}..."
+
+    case "${os}" in
+        "Alpine")
+            apk "${name}"
+            ;;
+        "Debian")
+            apt "${name}"
+            ;;
+        *)
+            echo "Unknown OS: ${os}"
+            ;;
+    esac
+)
+
+
+update_all() (
     containers=$(lxc list status=running -c n,config:image.os --format csv)
 
     while IFS= read -r container
@@ -75,25 +95,39 @@ main() (
         name="${container%,*}"
         os="${container#*,}"
 
-        echo "Processing ${name}..."
-
-        case "${os}" in
-            "Alpine")
-                apk "${name}"
-                ;;
-            "Debian")
-                apt "${name}"
-                ;;
-            *)
-                echo "Unknown OS: ${os}"
-                ;;
-        esac
-
-        echo ""
+        update "${name}" "${os}"
     done <<EOF
 $containers
 EOF
 )
 
-main
+
+update_specific() (
+    containers="${1}"
+
+    while IFS= read -r container
+    do
+        name="${container}"
+        os=$(lxc list name="${name}" -c config:image.os --format csv)
+
+        update "${name}" "${os}"
+    done <<EOF
+$containers
+EOF
+)
+
+
+main() (
+    if [ "${1}" = "--containers" ]; then
+        shift
+        containers=$(echo "${@}" | tr ' ' '\n')
+
+        update_specific "${containers}"
+    else
+        update_all
+    fi
+)
+
+
+main "${@}"
 
