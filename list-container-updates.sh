@@ -31,6 +31,11 @@ _exec() (
 
 main() (
     containers=$(lxc list status=running -c n,config:image.os --format csv)
+    names_only=0
+
+    if [ "${1}" = "--names-only" ]; then
+        names_only=1
+    fi
 
     while IFS= read -r container
     do
@@ -39,22 +44,29 @@ main() (
 
         case "${os}" in
             "Alpine")
-                apk "${name}"
+                results=$(apk "${name}")
                 ;;
             "Debian")
-                apt "${name}"
+                results=$(apt "${name}")
                 ;;
             *)
                 echo "Unknown OS: ${os}"
                 ;;
         esac
 
-        echo ""
+        if [ -n "${results}" ]; then
+            if [ "${names_only}" -eq 0 ]; then
+                echo "${results}"
+                echo ""
+            else
+                echo "${results}" | head -n 1
+            fi
+        fi
     done <<EOF
 $containers
 EOF
 )
 
 
-main
+main "${@}"
 
