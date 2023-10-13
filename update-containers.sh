@@ -34,7 +34,7 @@ snapshot() (
 
     if ! lxc snapshot "${name}" "${snapshot_name}"; then
         echo "${container} failed to snapshot. Skipping upgrade..."
-        return
+        return 1
     fi
 )
 
@@ -60,10 +60,10 @@ upgrade() (
         echo "Snapshot failed, skipping upgrade..."
     else
         _upgrade "${container}" "${cmd}"
-    fi
 
-    echo "Restarting ${container}..."
-    lxc restart "${container}"
+        echo "Restarting ${container}..."
+        lxc restart "${container}"
+    fi
 )
 
 
