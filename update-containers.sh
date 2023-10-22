@@ -96,6 +96,7 @@ update_all() (
         os="${container#*,}"
 
         update "${name}" "${os}"
+        echo ""
     done <<EOF
 $containers
 EOF
@@ -118,6 +119,16 @@ EOF
 
 
 main() (
+    # Paths
+    main_dir=$(dirname -- "$( readlink -f -- "$0"; )")
+    config_file="${main_dir}/config"
+
+    # Source config file if it exists
+    if [ -e "${config_file}" ]; then
+        . "${config_file}"
+    fi
+
+    # Upgrade
     if [ "${1}" = "--containers" ]; then
         shift
         containers=$(echo "${@}" | tr ' ' '\n')
@@ -125,6 +136,11 @@ main() (
         update_specific "${containers}"
     else
         update_all
+    fi
+
+    # Run post-upgrade command
+    if [ -n "${POST_UPGRADE_SCRIPT}" ]; then
+        sh -c "${POST_UPGRADE_SCRIPT}"
     fi
 )
 
