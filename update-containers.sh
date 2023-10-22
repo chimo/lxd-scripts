@@ -74,7 +74,7 @@ update() (
     echo "Processing ${name}..."
 
     case "${os}" in
-        "Alpine")
+        "Alpine"|"alpinelinux")
             apk "${name}"
             ;;
         "Debian")
