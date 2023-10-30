@@ -43,7 +43,7 @@ main() (
         os="${container#*,}"
 
         case "${os}" in
-            "Alpine")
+            "Alpine"|"alpinelinux")
                 results=$(apk "${name}")
                 ;;
             "Debian")
