@@ -47,6 +47,8 @@ EOF
         output="${output}]"
 
         echo "${output}"
+    else
+        echo "[]"
     fi
 )
 
