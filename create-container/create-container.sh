@@ -77,10 +77,11 @@ EOF
 )
 
 
-main() (
+create_container() (
+    # Params
     name="${1}"
-    shift
-    types=$(echo "${@}" | tr ' ' '\n')
+    image="${2}"
+    types=$(echo "${3}" | tr ' ' '\n')
 
     # Define some paths
     script_dir=$(dirname -- "$( readlink -f -- "$0"; )")
@@ -97,7 +98,7 @@ main() (
     fi
 
     # Create container
-    lxc launch images:alpine/3.18/amd64 "${name}"
+    lxc launch "${image}" "${name}"
 
     # wait for network
     sleep 5s
@@ -126,6 +127,65 @@ main() (
     fi
 )
 
+
+usage() (
+    echo "Usage ${0} <name>" 1>&2
+    exit 1
+)
+
+
+main() (
+    if [ "${#}" -lt 1 ]; then
+        usage
+    fi
+
+    # Params
+    name="${1}"
+    image=""
+    profiles=""
+
+    # Define some paths
+    script_dir=$(dirname -- "$( readlink -f -- "$0"; )")
+    containers_dir="${script_dir}/containers"
+    config_file="${containers_dir}/${name}/config"
+
+    if [ ! -f "${config_file}" ]; then
+        echo "Config file ${config_file} doesn't exist"
+        exit 1
+    fi
+
+    while IFS= read -r line <&3
+    do
+        # Skip blank lines
+        if [ -z "${line}" ]; then
+            continue
+        fi
+
+        # This is pretty unforgiving syntax-wise; we're not `trim`ing anything
+        # or doing any other sort of sanitization...
+        key="${line%=*}"
+        value="${line#*=}"
+
+        case $key in
+            image)
+                image="${value}"
+            ;;
+            profiles)
+                profiles="${value}"
+            ;;
+            *)
+                echo "Invalid config key '${key}'"
+            ;;
+        esac
+    done 3< "${config_file}"
+
+    if [ -z "${image}" ]; then
+        echo "Config file must contain an 'image' property"
+        exit 1
+    fi
+
+    create_container "${name}" "${image}" "${profiles}"
+)
 
 main "${@}"
 

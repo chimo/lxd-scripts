@@ -1,0 +1,3 @@
+name=ncmpcpp
+image=images:alpine/3.18/amd64
+profiles=audio
