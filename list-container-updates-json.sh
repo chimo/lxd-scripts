@@ -20,11 +20,11 @@ apk() (
 
             # 3.18.3-r0
             local_version=$(
-                echo "${installed_info}" | grep -oE ${version_format}
+                echo "${installed_info}" | grep -oE "${version_format}"
             )
 
             # alpine-base
-            pkg_name=$(echo "${installed_info}" | sed "s/-${current_version}//")
+            pkg_name=$(echo "${installed_info}" | sed "s/-${local_version}//")
 
             # 3.18.4-r0
             latest_version=$(echo "${line}" | awk '{print $3}')
@@ -58,11 +58,10 @@ apt() (
     cmd="apt list --upgradable | tail -n +2"
 
     output=$(
-        _exec "${container}" "${cmd}" \
-        | awk '{printf "%s\\n", $0}' # Replace newlines with literal "\n"
+        _exec "${container}" "${cmd}"
     )
 
-    printf '"%s"' "${output}"
+    printf '["%s"]' "${output}"
 )
 
 
@@ -128,6 +127,12 @@ EOF
 
     # Close array
     output="${output}]"
+
+    hostname=$(hostname)
+
+    output=$(
+        printf '{"hostname": "%s", "containers": %s}' "${hostname}" "${output}"
+    )
 
     # Print
     echo "${output}"
