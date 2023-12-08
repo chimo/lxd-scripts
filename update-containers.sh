@@ -116,7 +116,24 @@ EOF
 
 
 usage() (
-    echo "Usage: ${0} [-n]" 1>&2
+    message=""
+    newline="
+"
+
+    while IFS= read -r line
+    do
+        message="${message}${line}${newline}"
+    done <<EOF
+Usage: ${0} [-h] [-P] [-R] [-S]
+
+options:
+-h      show this help message and exit
+-P      do not run the post-upgrade script
+-R      do not restart the container after upgrade
+-S      do not snapshot the container before upgrade
+EOF
+
+    echo "${message}" 1>&2
     exit 1
 )
 
