@@ -1,4 +1,4 @@
-#!/bin/sh -eux
+#!/bin/sh -eu
 
 profile_exists() (
     profile="${1}"
@@ -167,7 +167,7 @@ EOF
 
 argparse() (
     config_dir=""
-    lxc_project="default"
+    lxc_project=""
 
     while getopts ':d:p:' opt
     do
@@ -176,7 +176,7 @@ argparse() (
                 config_dir="${OPTARG-}"
                 ;;
             p)
-                lxc_project="${OPTARG-default}"
+                lxc_project="${OPTARG-}"
                 ;;
             *)
                 usage
