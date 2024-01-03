@@ -235,7 +235,7 @@ main() (
     fi
 
     # Run post-upgrade command
-    if [ -n "${POST_UPGRADE_SCRIPT}" ] && [ "${post_upgrade}" -ne 0 ]; then
+    if [ -n "${POST_UPGRADE_SCRIPT-}" ] && [ "${post_upgrade}" -ne 0 ]; then
         sh -c "${POST_UPGRADE_SCRIPT}"
     fi
 )
