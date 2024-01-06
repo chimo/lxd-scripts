@@ -1,2 +1,2 @@
 name=newsboat
-image=images:alpine/3.18/amd64
+image=images:alpine/3.19/amd64
