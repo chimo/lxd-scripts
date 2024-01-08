@@ -17,3 +17,7 @@ nft -s list ruleset > /etc/nftables.nft
 
 service nftables restart
 
+# App
+service geo2tz start
+rc-update add geo2tz
+
