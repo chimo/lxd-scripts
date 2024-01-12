@@ -82,7 +82,7 @@ update() (
 )
 
 
-update_all() (
+update_running_containers() (
     containers=$(lxc list status=running -c n,config:image.os --format csv)
 
     while IFS= read -r container
@@ -91,6 +91,30 @@ update_all() (
         os="${container#*,}"
 
         handle "${restart}" "${snapshot}" "${name}" "${os}"
+        echo ""
+    done <<EOF
+$containers
+EOF
+)
+
+
+update_stopped_containers() (
+    containers=$(lxc list status=stopped -c n,config:image.os --format csv)
+    restart=0
+
+    while IFS= read -r container
+    do
+        name="${container%,*}"
+        os="${container#*,}"
+
+        echo "Starting ${name}..."
+        lxc start "${name}"
+
+        handle "${restart}" "${snapshot}" "${name}" "${os}"
+
+        echo "Stopping ${name}..."
+        lxc stop "${name}"
+
         echo ""
     done <<EOF
 $containers
@@ -124,9 +148,10 @@ usage() (
     do
         message="${message}${line}${newline}"
     done <<EOF
-Usage: ${0} [-h] [-P] [-R] [-S]
+Usage: ${0} [-a] [-h] [-P] [-R] [-S]
 
 options:
+-a      all containers (stopped containers will be started, upgraded and stopped)
 -h      show this help message and exit
 -P      do not run the post-upgrade script
 -R      do not restart the container after upgrade
@@ -139,13 +164,17 @@ EOF
 
 
 argparse() (
+    all_containers=0
     post_upgrade=1
     restart=1
     snapshot=1
 
-    while getopts ':PRS' opt
+    while getopts ':aPRS' opt
     do
         case $opt in
+            a)
+                all_containers=1
+                ;;
             P)
                 post_upgrade=0
                 ;;
@@ -163,7 +192,7 @@ argparse() (
 
     shift "$((OPTIND - 1))"
 
-    main "${post_upgrade}" "${restart}" "${snapshot}" "${*}"
+    main "${post_upgrade}" "${restart}" "${snapshot}" "${all_containers}" "${*}"
 )
 
 
@@ -204,8 +233,8 @@ handle() (
     fi
 
     # Restart
-    echo "Restarting ${name}..."
     if [ "${restart}" -ne 0 ]; then
+        echo "Restarting ${name}..."
         lxc restart "${name}"
     fi
 )
@@ -216,7 +245,8 @@ main() (
     post_upgrade="${1}"
     restart="${2}"
     take_snapshot="${3}"
-    containers="${4}"
+    all_containers="${4}"
+    containers="${5}"
 
     # Paths
     main_dir=$(dirname -- "$( readlink -f -- "$0"; )")
@@ -231,7 +261,11 @@ main() (
         containers=$(echo "${containers}" | tr ' ' '\n')
         update_specific "${restart}" "${take_snapshot}" "${containers}"
     else
-        update_all "${restart}" "${take_snapshot}"
+        update_running_containers "${restart}" "${take_snapshot}"
+
+        if [ "${all_containers}" -eq 1 ]; then
+            update_stopped_containers "${take_snapshot}"
+        fi
     fi
 
     # Run post-upgrade command
