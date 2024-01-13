@@ -1,20 +1,6 @@
 #!/bin/sh -eu
 
-apk() (
-    container="${1}"
-
-    cmd="apk upgrade"
-    upgrade "${container}" "${cmd}"
-)
-
-
-apt() (
-    container="${1}"
-    cmd="apt update && apt upgrade -y"
-
-    upgrade "${container}" "${cmd}"
-)
-
+LIBS_DIR=""
 
 snapshot() (
     container="${1}"
@@ -24,61 +10,6 @@ snapshot() (
         echo "${container} failed to snapshot. Skipping upgrade..."
         return 1
     fi
-)
-
-
-upgrade() (
-    name="${1}"
-    cmd="${2}"
-
-    if ! lxc exec "${name}" -- sh -c "${cmd}" < /dev/null; then
-        return 1
-    fi
-)
-
-
-check_for_updates() (
-    name="${1}"
-    os="${2}"
-
-    case "${os}" in
-        "Alpine"|"alpinelinux")
-            lxc exec "${name}" -- sh -c "apk update -q" < /dev/null > /dev/null
-
-            updates=$(
-                lxc exec "${name}" -- sh -c "apk list -u | wc -l" < /dev/null
-            )
-            ;;
-        "Debian")
-            lxc exec "${name}" -- sh -c "apk update" < /dev/null > /dev/null
-
-            updates=$(
-                lxc exec "${name}" -- sh -c "apk list --upgradable" < /dev/null
-            )
-            ;;
-        *)
-            ;;
-    esac
-
-    echo "${updates}"
-)
-
-
-update() (
-    name="${1}"
-    os="${2}"
-
-    case "${os}" in
-        "Alpine"|"alpinelinux")
-            apk "${name}"
-            ;;
-        "Debian")
-            apt "${name}"
-            ;;
-        *)
-            echo "Unknown OS: ${os}"
-            ;;
-    esac
 )
 
 
@@ -196,16 +127,43 @@ argparse() (
 )
 
 
+normalize_os_name() (
+    original_os="${1}"
+    normalized_os=""
+
+    case "${original_os}" in
+        "Alpine"|"alpinelinux")
+            normalized_os="alpine"
+            ;;
+        "Debian")
+            normalized_os="debian"
+            ;;
+        *)
+            ;;
+    esac
+
+    echo "${normalized_os}"
+)
+
+
 handle() (
     restart="${1}"
     take_snapshot="${2}"
     name="${3}"
-    os="${4}"
+    original_os="${4}"
 
     echo "Processing ${name}..."
 
+    os=$(normalize_os_name "${original_os}")
+    os_dir="${LIBS_DIR}/${os}"
+
+    if [ ! -e "${os_dir}" ]; then
+        echo "Unsupported OS"
+        return 0
+    fi
+
     # Check for updates
-    nb_updates=$(check_for_updates "${name}" "${os}")
+    nb_updates=$(lxc exec "${name}" -- sh < "${os_dir}/check-for-updates.sh")
 
     # Bail if no updates are pending
     if [ "${nb_updates}" -eq 0 ]; then
@@ -226,8 +184,8 @@ handle() (
 
     # Update
     echo "Upgrading ${name}..."
-    if ! update "${name}" "${os}"; then
-        echo "Update failed"
+    if ! lxc exec "${name}" -- sh < "${os_dir}/upgrade.sh" ; then
+        echo "Upgrade failed"
 
         return 1
     fi
@@ -250,7 +208,8 @@ main() (
 
     # Paths
     main_dir=$(dirname -- "$( readlink -f -- "$0"; )")
-    config_file="${main_dir}/config"
+    LIBS_DIR="${main_dir}/libs"
+    config_file="${main_dir}/../config"
 
     # Source config file if it exists
     if [ -e "${config_file}" ]; then
