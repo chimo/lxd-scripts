@@ -1,4 +1,4 @@
-# Optional config file. Rename to "config"
+# Optional config file. Rename to ".config"
 
 # Script to run after upgrades are done (or have failed).
 export POST_UPGRADE_SCRIPT="/path/to/shell/script.sh"

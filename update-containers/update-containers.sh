@@ -269,7 +269,7 @@ main() (
     # Paths
     main_dir=$(dirname -- "$( readlink -f -- "$0"; )")
     LIBS_DIR="${main_dir}/libs"
-    config_file="${main_dir}/../config"
+    config_file="${main_dir}/.config"
 
     # Source config file if it exists
     if [ -e "${config_file}" ]; then
