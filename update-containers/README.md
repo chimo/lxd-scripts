@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-Usage: ./update-containers.sh [-a] [-d] [-h] [-P] [-R] [-S]
+Usage: ./update-containers.sh [-a] [-d] [-h] [-P] [-R] [-S] [c1 c2...]
 
 options:
 -a      all containers (stopped containers will be started, upgraded and stopped)
