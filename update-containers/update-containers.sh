@@ -106,10 +106,11 @@ usage() (
     do
         message="${message}${line}${newline}"
     done <<EOF
-Usage: ${0} [-a] [-h] [-P] [-R] [-S]
+Usage: ${0} [-a] [-d] [-h] [-P] [-R] [-S]
 
 options:
 -a      all containers (stopped containers will be started, upgraded and stopped)
+-d      perform "dist-upgrade"
 -h      show this help message and exit
 -P      do not run the post-upgrade script
 -R      do not restart the container after upgrade
