@@ -294,6 +294,13 @@ main() (
     fi
 )
 
+sanity_check() (
+    if ! which bc > /dev/null 2>&1; then
+        echo 'Missing `bc` utility'
+        exit 1
+    fi
+)
 
+sanity_check
 argparse "${@}"
 
