@@ -4,5 +4,5 @@
 echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 
 # Install
-apk add rbw pinentry-tty
+apk add rbw pinentry-tty vim
 
