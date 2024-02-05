@@ -1,5 +1,5 @@
 #!/bin/sh -e
 
-# Install irssi
-apk add irssi
+# Install
+apk add irssi irssi-perl
 
